@@ -12,8 +12,8 @@ class Board extends Component
 	{
 		var row = [];
 		for (var i = 0; i < 8; i++) 
-      		row.push(this.renderSquare(r*8+i));
-		return (<div key={'row'+r}>{row}</div>);
+      		row.push(this.renderSquare(r * 8 + i));
+		return (<div key={'row' + r}>{row}</div>);
 	}
 
 	renderRows() 
@@ -30,7 +30,8 @@ class Board extends Component
 	}
 }
 
-class Game extends Component {
+class Game extends Component 
+{
 	constructor() 
 	{
 		super();
@@ -47,24 +48,25 @@ class Game extends Component {
 	handleClick(i) 
 	{
 		const squares = this.state.squares.slice();
-		if (this.state.stepNumber >= 60 || squares[i])
-			return;
+		if (this.state.stepNumber < 60 && !squares[i])
+		{
+			var toWololo = this.wololo(i);
+			if (toWololo.length !== 0)
+			{
 
-		var toWololo = this.wololo(i);
-		if (toWololo.length === 0)
-			return;
+				var current = this.state.xIsNext ? 'X' : 'O';
+				toWololo.forEach(function(square){
+					squares[square] = current;
+				});
+				squares[i] = current;
 
-		var current = this.state.xIsNext ? 'X' : 'O';
-		toWololo.forEach(function(square){
-			squares[square] = current;
-		});
-		squares[i] = current;
-
-		this.setState({
-			squares: squares,
-			stepNumber: this.state.stepNumber+1,
-			xIsNext: !this.state.xIsNext,
-		});
+				this.setState({
+					squares: squares,
+					stepNumber: this.state.stepNumber+1,
+					xIsNext: !this.state.xIsNext,
+				});
+			}
+		}
 	}
 
 	wololo(i)
@@ -88,6 +90,7 @@ class Game extends Component {
 		var found = false;
 		var curr = this.state.xIsNext ? 'X' : 'O';
 		var x = getX(i) + xStep, y = getY(i) + yStep;
+		// TODO: Clean up without return in the middle
 		while (!found && x >= 0 && x < 8 && y >= 0 && y < 8)
 		{
 			if (!squares[getId(x,y)])
@@ -112,21 +115,22 @@ class Game extends Component {
 
 	passTurn()
 	{
-		if (this.state.stepNumber > 59)
-			return;
-		this.setState({ xIsNext: !this.state.xIsNext });
+		if (this.state.stepNumber <= 59)
+			this.setState({ xIsNext: !this.state.xIsNext });
 	}
 
-	giveUp(){
-		if (this.state.stepNumber > 59)
-			return;
-		const squares = this.state.squares.slice();
-		const fillWith = this.state.xIsNext ? 'O' : 'X';
-		for(let i = 0; i < 64; i++)
-			if (squares[i] === null)
-				squares[i] = fillWith;
-		console.log(squares);
-		this.setState({ squares: squares, stepNumber: 60 });
+	giveUp()
+	{
+		if (this.state.stepNumber <= 59)
+		{		
+			const squares = this.state.squares.slice();
+			const fillWith = this.state.xIsNext ? 'O' : 'X';
+			for(let i = 0; i < 64; i++)
+				if (squares[i] === null)
+					squares[i] = fillWith;
+			console.log(squares);
+			this.setState({ squares: squares, stepNumber: 60 });
+		}
 	}
 
 	render() 
@@ -164,24 +168,25 @@ function Square(props)
 
 function getX(i)
 {
-  return i % 8;
+	return i % 8;
 }
 
 function getY(i)
 {
-  return parseInt(i / 8, 10);
+	return parseInt(i / 8, 10);
 }
 
 function getId(x, y)
 {
-  return y * 8 + x;
+	return y * 8 + x;
 }
 
 function calculateWinner(score) 
 {
+	var winner = null;
 	if (score.o + score.x === 64)
-		return score.x > score.o ? 'X' : 'O';
-	return null
+		winner = score.x > score.o ? 'X' : 'O';
+	return winner;
 }
 
 function calculateScore(squares)
