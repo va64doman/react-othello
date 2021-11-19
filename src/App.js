@@ -68,7 +68,7 @@ class Game extends Component
 			}
 		}
 	}
-
+	// Flip the color line if it is between the new space and existing space based on the current color.
 	wololo(i)
 	{
 		var toWololo = Array(0);
@@ -90,12 +90,12 @@ class Game extends Component
 		var found = false;
 		var curr = this.state.xIsNext ? 'X' : 'O';
 		var x = getX(i) + xStep, y = getY(i) + yStep;
-		// TODO: Clean up without return in the middle
 		while (!found && x >= 0 && x < 8 && y >= 0 && y < 8)
 		{
 			if (!squares[getId(x,y)])
 			{
-				return [];
+				x = -1;
+				toWololo = [];
 			}
 			else if (squares[getId(x,y)] === curr)
 			{
@@ -108,9 +108,10 @@ class Game extends Component
 				y += yStep;
 			}
 		}
-		if(found)
-			return toWololo;
-		return [];
+		if(!found)
+			toWololo = [];
+
+		return toWololo;
 	}
 
 	passTurn()
